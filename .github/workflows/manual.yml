@@ -1,6 +1,9 @@
 name: Manual deploy
 
 on:
+  push:
+    branches:
+      - master
   workflow_dispatch:
     inputs:
       sha:
@@ -19,21 +22,7 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
       with:
-        ref: ${{ github.event.inputs.sha }}
-        
-        
-    - name: ensure sha1 ok
-      run: |
-        if git show-ref --quiet ${{ github.event.inputs.sha }};
-        then
-          echo "::error ::Must be SHA1";
-          exit 1;
-        fi
-        if ! git merge-base --is-ancestor ${{ github.event.inputs.sha }} master;
-        then
-          echo "::error ::Must be on master";
-          exit 1;
-        fi
+        ref: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.sha)  || '' }}
 
     # Runs a single command using the runners shell
     - name: echo
